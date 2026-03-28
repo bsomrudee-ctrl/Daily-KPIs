@@ -236,7 +236,7 @@
             },
             screw: {
                 fileName: "KPI_Screw.html",
-                apiUrl: "",
+                apiUrl: "https://script.google.com/macros/s/AKfycbya9u9yt0H0XljaLMhasjykxtEYuwLcfAE6UJv83NTB8A8tIsYPO10kT8qJT4YqZ3Sd/exec",
                 type: "api-or-json",
                 dailyEl: "screw-daily",
                 unitEl: "screw-unit"
@@ -369,18 +369,39 @@
                     }
 
                     const rows = result.data;
-                    const idx = { daily: 8, unit: 9 };
+                    const headers = rows[0].map(h => String(h || "").trim().toLowerCase());
+
+                    const findIndex = (names) => headers.findIndex(h => names.includes(h));
+
+                    const idx = {
+                        date: findIndex(["วันที่", "date"]),
+                        actual: findIndex(["productivity_actual", "actual", "prod", "productivity"])
+                    };
+
+                    if (idx.date === -1 || idx.actual === -1) {
+                        throw new Error("ไม่พบคอลัมน์วันที่หรือ Productivity_Actual ของ Screw");
+                    }
+
+                    const today = new Date();
+                    const todayStr = `${String(today.getDate()).padStart(2, "0")}/${String(today.getMonth() + 1).padStart(2, "0")}/${today.getFullYear()}`;
 
                     const data = rows.slice(1)
                         .filter(cols => cols.some(cell => String(cell).trim() !== ""))
                         .map(cols => ({
-                            daily: cols[idx.daily],
-                            unit: cols[idx.unit]
+                            date: String(cols[idx.date] || "").trim(),
+                            actual: parseFloat(String(cols[idx.actual] || "0").replace(/,/g, "")) || 0
                         }));
 
-                    const latest = data[data.length - 1] || {};
-                    document.getElementById(config.dailyEl).textContent = latest.daily || "-";
-                    document.getElementById(config.unitEl).textContent = latest.unit || "-";
+                    const actualRows = data.filter(d => d.actual > 0);
+                    const todayRow = actualRows.find(d => d.date === todayStr);
+                    const latestRow = actualRows.length ? actualRows[actualRows.length - 1] : null;
+
+                    const currentActual = todayRow
+                        ? todayRow.actual.toFixed(2)
+                        : (latestRow ? latestRow.actual.toFixed(2) : "-");
+
+                    document.getElementById(config.dailyEl).textContent = currentActual;
+                    document.getElementById(config.unitEl).textContent = "PTS";
                     return;
                 } catch (error) {
                     console.error("Screw API error:", error);
