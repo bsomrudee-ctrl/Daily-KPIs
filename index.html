@@ -229,7 +229,7 @@
             },
             plough: {
                 fileName: "KPI_Plough.html",
-                apiUrl: "",
+                apiUrl: "https://script.google.com/macros/s/AKfycbw4AN-QcUUt1vgTTuQArvShGjujdHMlafw1I5DCMs6BfLOJY6Yd-AL3_SMEYNyiUxl_og/exec",
                 type: "api-or-json",
                 targetEl: "plough-target",
                 focusEl: "plough-focus"
@@ -312,18 +312,38 @@
                     }
 
                     const rows = result.data;
-                    const idx = { target: 8, focus: 9 };
+                    const headers = rows[0].map(h => String(h || "").trim().toLowerCase());
+
+                    const findIndex = (names) => headers.findIndex(h => names.includes(h));
+
+                    const idx = {
+                        date: findIndex(["วันที่", "date"]),
+                        productivity: findIndex(["productivity", "prod"])
+                    };
+
+                    if (idx.date === -1 || idx.productivity === -1) {
+                        throw new Error("ไม่พบคอลัมน์วันที่หรือ Productivity ของ Plough");
+                    }
+
+                    const today = new Date();
+                    const todayStr = `${String(today.getDate()).padStart(2, "0")}/${String(today.getMonth() + 1).padStart(2, "0")}/${today.getFullYear()}`;
 
                     const data = rows.slice(1)
                         .filter(cols => cols.some(cell => String(cell).trim() !== ""))
                         .map(cols => ({
-                            target: cols[idx.target],
-                            focus: cols[idx.focus]
+                            date: String(cols[idx.date] || "").trim(),
+                            productivity: parseFloat(String(cols[idx.productivity] || "0").replace(/,/g, "")) || 0
                         }));
 
-                    const latest = data[data.length - 1] || {};
-                    document.getElementById(config.targetEl).textContent = latest.target || "-";
-                    document.getElementById(config.focusEl).textContent = latest.focus || "-";
+                    const todayRow = data.find(d => d.date === todayStr);
+                    const latestRow = data[data.length - 1];
+
+                    const currentProd = todayRow
+                        ? todayRow.productivity.toFixed(3)
+                        : (latestRow ? latestRow.productivity.toFixed(3) : "-");
+
+                    document.getElementById(config.targetEl).textContent = "0.063";
+                    document.getElementById(config.focusEl).textContent = currentProd;
                     return;
                 } catch (error) {
                     console.error("Plough API error:", error);
