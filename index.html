@@ -63,8 +63,10 @@
             border: none;
             border-radius: 1rem;
         }
-        
-        .hidden { display: none; }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -81,7 +83,7 @@
                     <p class="text-xs text-slate-400 font-light">Production Monitoring System</p>
                 </div>
             </div>
-            
+
             <div id="backButton" class="hidden">
                 <button onclick="showPage('main')" class="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full transition-all text-sm font-medium">
                     <i data-lucide="arrow-left" class="w-4 h-4 text-pink-300"></i>
@@ -95,15 +97,16 @@
     <main id="mainPage" class="max-w-7xl mx-auto px-6 pb-12 page-transition">
         <header class="mb-10 text-center md:text-left">
             <h2 class="text-3xl font-bold mb-2">ยินดีต้อนรับ 👋</h2>
-            <p class="text-slate-400">เลือกดูรายงาน KPI รายวันของแต่ละส่วนงานด้านล่างนี้</p>
+            <p class="text-slate-400">เลือกดูรายงาน KPI รายวันของแต่ละส่วนงานด้านล่างนี้จ้า</p>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            
+
             <!-- Dozer Card -->
             <div onclick="showPage('dozer')" class="glass-card rounded-3xl p-8 cursor-pointer group">
                 <div class="flex flex-col items-center text-center">
                     <div class="floating mb-6">
+                        <!-- Cute SVG Illustration for Dozer/Construction -->
                         <svg width="120" height="120" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="40" y="80" width="120" height="60" rx="10" fill="#ffb7c5" fill-opacity="0.8"/>
                             <circle cx="60" cy="140" r="20" fill="#334155"/>
@@ -117,12 +120,12 @@
                     <div class="w-full bg-slate-800/50 rounded-2xl p-4 flex justify-around">
                         <div class="text-center">
                             <span class="block text-xs text-slate-500 uppercase">Target</span>
-                            <span class="font-bold text-pink-300">90%</span>
+                            <span id="dozer-target" class="font-bold text-pink-300">-</span>
                         </div>
                         <div class="w-px bg-slate-700"></div>
                         <div class="text-center">
                             <span class="block text-xs text-slate-500 uppercase">Status</span>
-                            <span class="font-bold text-emerald-400">Normal</span>
+                            <span id="dozer-status" class="font-bold text-emerald-400">-</span>
                         </div>
                     </div>
                 </div>
@@ -132,11 +135,29 @@
             <div onclick="showPage('plough')" class="glass-card rounded-3xl p-8 cursor-pointer group">
                 <div class="flex flex-col items-center text-center">
                     <div class="floating mb-6" style="animation-delay: 0.5s">
+                        <!-- Plough illustration -->
                         <svg width="120" height="120" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M50 140C50 140 80 130 150 130L160 150H40L50 140Z" fill="#a5d8ff" fill-opacity="0.8"/>
-                            <rect x="70" y="80" width="10" height="60" transform="rotate(15 70 80)" fill="#64748b"/>
-                            <rect x="120" y="80" width="10" height="60" transform="rotate(-15 120 80)" fill="#64748b"/>
-                            <circle cx="100" cy="70" r="30" fill="#a5d8ff" fill-opacity="0.3" stroke="#a5d8ff" stroke-width="2"/>
+                            <rect x="45" y="70" width="95" height="12" rx="6" fill="#f97316" fill-opacity="0.95"/>
+                            <path d="M138 74 L178 58" stroke="#fb923c" stroke-width="8" stroke-linecap="round"/>
+                            <rect x="145" y="62" width="10" height="36" rx="4" fill="#f97316"/>
+                            <path d="M150 62 L162 50" stroke="#fdba74" stroke-width="5" stroke-linecap="round"/>
+                            <circle cx="38" cy="112" r="20" fill="#111827"/>
+                            <circle cx="38" cy="112" r="5" fill="#f97316"/>
+                            <path d="M50 96 L72 85" stroke="#ea580c" stroke-width="6" stroke-linecap="round"/>
+                            <line x1="52" y1="74" x2="52" y2="98" stroke="#94a3b8" stroke-width="3"/>
+                            <path d="M52 78 C48 82, 56 86, 52 90 C48 94, 56 98, 52 102" stroke="#cbd5e1" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                            <rect x="78" y="80" width="7" height="24" rx="3.5" fill="#334155"/>
+                            <rect x="108" y="80" width="7" height="24" rx="3.5" fill="#334155"/>
+                            <rect x="136" y="80" width="7" height="24" rx="3.5" fill="#334155"/>
+                            <rect x="162" y="80" width="7" height="24" rx="3.5" fill="#334155"/>
+                            <ellipse cx="82" cy="112" rx="14" ry="22" fill="#020617"/>
+                            <ellipse cx="112" cy="112" rx="14" ry="22" fill="#020617"/>
+                            <ellipse cx="140" cy="112" rx="14" ry="22" fill="#020617"/>
+                            <ellipse cx="166" cy="112" rx="12" ry="20" fill="#020617"/>
+                            <ellipse cx="82" cy="106" rx="5" ry="9" fill="#475569" fill-opacity="0.25"/>
+                            <ellipse cx="112" cy="106" rx="5" ry="9" fill="#475569" fill-opacity="0.25"/>
+                            <ellipse cx="140" cy="106" rx="5" ry="9" fill="#475569" fill-opacity="0.25"/>
+                            <ellipse cx="166" cy="106" rx="4" ry="8" fill="#475569" fill-opacity="0.25"/>
                         </svg>
                     </div>
                     <h3 class="text-xl font-bold mb-2 group-hover:text-blue-300 transition-colors">KPI Plough</h3>
@@ -144,12 +165,12 @@
                     <div class="w-full bg-slate-800/50 rounded-2xl p-4 flex justify-around">
                         <div class="text-center">
                             <span class="block text-xs text-slate-500 uppercase">Target</span>
-                            <span class="font-bold text-blue-300">0.063</span>
+                            <span id="plough-target" class="font-bold text-blue-300">-</span>
                         </div>
                         <div class="w-px bg-slate-700"></div>
                         <div class="text-center">
                             <span class="block text-xs text-slate-500 uppercase">Focus</span>
-                            <span class="font-bold text-purple-300">Daily</span>
+                            <span id="plough-focus" class="font-bold text-purple-300">-</span>
                         </div>
                     </div>
                 </div>
@@ -159,23 +180,24 @@
             <div onclick="showPage('screw')" class="glass-card rounded-3xl p-8 cursor-pointer group">
                 <div class="flex flex-col items-center text-center">
                     <div class="floating mb-6" style="animation-delay: 1s">
+                        <!-- Cute SVG Illustration for Screw -->
                         <svg width="120" height="120" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="85" y="40" width="30" height="100" rx="5" fill="#d0bfff" fill-opacity="0.8"/>
                             <path d="M85 60L115 75M85 85L115 100M85 110L115 125" stroke="#334155" stroke-width="6" stroke-linecap="round"/>
                             <circle cx="100" cy="150" r="15" fill="#d0bfff"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold mb-2 group-hover:text-purple-300 transition-colors">Production Screw</h3>
+                    <h3 class="text-xl font-bold mb-2 group-hover:text-purple-300 transition-colors">KPI Screw</h3>
                     <p class="text-sm text-slate-400 mb-6">ติดตามการผลิตใบเกลียว (Screw) ประจำวัน</p>
                     <div class="w-full bg-slate-800/50 rounded-2xl p-4 flex justify-around">
                         <div class="text-center">
                             <span class="block text-xs text-slate-500 uppercase">Daily</span>
-                            <span class="font-bold text-purple-300">Track</span>
+                            <span id="screw-daily" class="font-bold text-purple-300">-</span>
                         </div>
                         <div class="w-px bg-slate-700"></div>
                         <div class="text-center">
                             <span class="block text-xs text-slate-500 uppercase">Unit</span>
-                            <span class="font-bold text-emerald-400">PCS</span>
+                            <span id="screw-unit" class="font-bold text-emerald-400">-</span>
                         </div>
                     </div>
                 </div>
@@ -183,6 +205,7 @@
 
         </div>
 
+        <!-- System Status Footer -->
         <footer class="mt-16 text-center text-slate-500 text-xs">
             <p>© 2024 KPI Monitoring Dashboard • Minimal Pastel Dark Edition</p>
             <div class="flex justify-center gap-4 mt-4">
@@ -200,6 +223,62 @@
     <script>
         lucide.createIcons();
 
+        async function loadKpiData(fileName) {
+            try {
+                const response = await fetch(fileName, { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error(`Failed to load ${fileName}: ${response.status}`);
+                }
+
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const jsonScript = doc.querySelector('#page-kpi-data');
+
+                if (!jsonScript) {
+                    console.warn(`No KPI data found in ${fileName}`);
+                    return null;
+                }
+
+                return JSON.parse(jsonScript.textContent.trim());
+            } catch (error) {
+                console.error('Load KPI error:', fileName, error);
+                return null;
+            }
+        }
+
+        async function updateDashboardCards() {
+            const [dozer, plough, screw] = await Promise.all([
+                loadKpiData('KPI_Dozer.html'),
+                loadKpiData('KPI_Plough.html'),
+                loadKpiData('KPI_Screw.html')
+            ]);
+
+            if (dozer) {
+                const targetEl = document.getElementById('dozer-target');
+                const statusEl = document.getElementById('dozer-status');
+
+                if (targetEl) targetEl.textContent = dozer.target ?? '-';
+                if (statusEl) statusEl.textContent = dozer.status ?? '-';
+            }
+
+            if (plough) {
+                const targetEl = document.getElementById('plough-target');
+                const focusEl = document.getElementById('plough-focus');
+
+                if (targetEl) targetEl.textContent = plough.target ?? '-';
+                if (focusEl) focusEl.textContent = plough.focus ?? '-';
+            }
+
+            if (screw) {
+                const dailyEl = document.getElementById('screw-daily');
+                const unitEl = document.getElementById('screw-unit');
+
+                if (dailyEl) dailyEl.textContent = screw.daily ?? '-';
+                if (unitEl) unitEl.textContent = screw.unit ?? '-';
+            }
+        }
+
         function showPage(pageId) {
             const mainPage = document.getElementById('mainPage');
             const detailPage = document.getElementById('detailPage');
@@ -215,9 +294,9 @@
                 mainPage.classList.add('hidden');
                 detailPage.classList.remove('hidden');
                 backButton.classList.remove('hidden');
-                
+
                 let fileName = '';
-                switch(pageId) {
+                switch (pageId) {
                     case 'dozer':
                         fileName = 'KPI_Dozer.html';
                         break;
@@ -234,6 +313,8 @@
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        updateDashboardCards();
     </script>
 </body>
 </html>
