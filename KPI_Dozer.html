@@ -419,6 +419,16 @@
             updateCard("mheff", avg.mh, STDS.mh);
             renderTable(data);
             renderCharts(data);
+
+            const todayProd = data.length ? `${data[data.length - 1].prod}%` : "-";
+            const kpiScript = document.getElementById("page-kpi-data");
+            if (kpiScript) {
+                kpiScript.textContent = JSON.stringify({
+                    product: "Dozer",
+                    target: "90%",
+                    status: todayProd
+                }, null, 2);
+            }
         }
 
         function escapeHtml(str) {
@@ -491,7 +501,7 @@
     {
       "product": "Dozer",
       "target": "90%",
-      "status": "Normal"
+      "status": "-"
     }
     </script>
 </body>
