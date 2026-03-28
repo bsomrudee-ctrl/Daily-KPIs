@@ -64,9 +64,7 @@
             border-radius: 1rem;
         }
 
-        .hidden {
-            display: none;
-        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -97,7 +95,7 @@
     <main id="mainPage" class="max-w-7xl mx-auto px-6 pb-12 page-transition">
         <header class="mb-10 text-center md:text-left">
             <h2 class="text-3xl font-bold mb-2">ยินดีต้อนรับ 👋</h2>
-            <p class="text-slate-400">เลือกดูรายงาน KPI รายวันของแต่ละส่วนงานด้านล่างนี้จ้า</p>
+            <p class="text-slate-400">เลือกดูรายงาน KPI รายวันของแต่ละส่วนงานด้านล่างนี้</p>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -106,7 +104,6 @@
             <div onclick="showPage('dozer')" class="glass-card rounded-3xl p-8 cursor-pointer group">
                 <div class="flex flex-col items-center text-center">
                     <div class="floating mb-6">
-                        <!-- Cute SVG Illustration for Dozer/Construction -->
                         <svg width="120" height="120" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="40" y="80" width="120" height="60" rx="10" fill="#ffb7c5" fill-opacity="0.8"/>
                             <circle cx="60" cy="140" r="20" fill="#334155"/>
@@ -135,7 +132,6 @@
             <div onclick="showPage('plough')" class="glass-card rounded-3xl p-8 cursor-pointer group">
                 <div class="flex flex-col items-center text-center">
                     <div class="floating mb-6" style="animation-delay: 0.5s">
-                        <!-- Plough illustration -->
                         <svg width="120" height="120" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="45" y="70" width="95" height="12" rx="6" fill="#f97316" fill-opacity="0.95"/>
                             <path d="M138 74 L178 58" stroke="#fb923c" stroke-width="8" stroke-linecap="round"/>
@@ -180,7 +176,6 @@
             <div onclick="showPage('screw')" class="glass-card rounded-3xl p-8 cursor-pointer group">
                 <div class="flex flex-col items-center text-center">
                     <div class="floating mb-6" style="animation-delay: 1s">
-                        <!-- Cute SVG Illustration for Screw -->
                         <svg width="120" height="120" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="85" y="40" width="30" height="100" rx="5" fill="#d0bfff" fill-opacity="0.8"/>
                             <path d="M85 60L115 75M85 85L115 100M85 110L115 125" stroke="#334155" stroke-width="6" stroke-linecap="round"/>
@@ -223,95 +218,201 @@
     <script>
         lucide.createIcons();
 
-        async function loadKpiData(fileName) {
+        const PRODUCT_CONFIG = {
+            dozer: {
+                fileName: "KPI_Dozer.html",
+                apiUrl: "https://script.google.com/macros/s/AKfycbw3OPytEZL3Cf6Kh6whxXoA0SIAZLFmeiTfV7nyveB1nCYjryCyIz4jv_-Xr-Uq4hgm/exec",
+                type: "api",
+                targetEl: "dozer-target",
+                statusEl: "dozer-status",
+                targetValue: "90%"
+            },
+            plough: {
+                fileName: "KPI_Plough.html",
+                apiUrl: "",
+                type: "api-or-json",
+                targetEl: "plough-target",
+                focusEl: "plough-focus"
+            },
+            screw: {
+                fileName: "KPI_Screw.html",
+                apiUrl: "",
+                type: "api-or-json",
+                dailyEl: "screw-daily",
+                unitEl: "screw-unit"
+            }
+        };
+
+        function parseNum(val) {
+            if (!val) return 0;
+            return parseFloat(String(val).replace(/[%, ]/g, "")) || 0;
+        }
+
+        async function loadHtmlEmbeddedJson(fileName) {
             try {
-                const response = await fetch(fileName, { cache: 'no-store' });
-                if (!response.ok) {
-                    throw new Error(`Failed to load ${fileName}: ${response.status}`);
-                }
+                const response = await fetch(fileName, { cache: "no-store" });
+                if (!response.ok) throw new Error(`Failed to load ${fileName}: ${response.status}`);
 
                 const html = await response.text();
                 const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const jsonScript = doc.querySelector('#page-kpi-data');
+                const doc = parser.parseFromString(html, "text/html");
+                const jsonScript = doc.querySelector("#page-kpi-data");
 
-                if (!jsonScript) {
-                    console.warn(`No KPI data found in ${fileName}`);
-                    return null;
-                }
-
+                if (!jsonScript) return null;
                 return JSON.parse(jsonScript.textContent.trim());
             } catch (error) {
-                console.error('Load KPI error:', fileName, error);
+                console.error("Load embedded JSON error:", fileName, error);
                 return null;
             }
         }
 
-        async function updateDashboardCards() {
-            const [dozer, plough, screw] = await Promise.all([
-                loadKpiData('KPI_Dozer.html'),
-                loadKpiData('KPI_Plough.html'),
-                loadKpiData('KPI_Screw.html')
-            ]);
+        async function loadDozerFromApi() {
+            const config = PRODUCT_CONFIG.dozer;
 
-            if (dozer) {
-                const targetEl = document.getElementById('dozer-target');
-                const statusEl = document.getElementById('dozer-status');
+            try {
+                const response = await fetch(config.apiUrl + "?t=" + Date.now());
+                if (!response.ok) throw new Error("โหลดข้อมูล Dozer ไม่สำเร็จ");
 
-                if (targetEl) targetEl.textContent = dozer.target ?? '-';
-                if (statusEl) statusEl.textContent = dozer.status ?? '-';
-            }
+                const result = await response.json();
+                if (!result.success || !result.data || result.data.length < 2) {
+                    throw new Error(result.message || "ไม่พบข้อมูล Dozer");
+                }
 
-            if (plough) {
-                const targetEl = document.getElementById('plough-target');
-                const focusEl = document.getElementById('plough-focus');
+                const rows = result.data;
+                const idx = { prod: 8 };
 
-                if (targetEl) targetEl.textContent = plough.target ?? '-';
-                if (focusEl) focusEl.textContent = plough.focus ?? '-';
-            }
+                const data = rows.slice(1)
+                    .filter(cols => cols.some(cell => String(cell).trim() !== ""))
+                    .map(cols => ({
+                        prod: parseNum(cols[idx.prod])
+                    }));
 
-            if (screw) {
-                const dailyEl = document.getElementById('screw-daily');
-                const unitEl = document.getElementById('screw-unit');
+                const latestProd = data.length ? `${data[data.length - 1].prod}%` : "-";
 
-                if (dailyEl) dailyEl.textContent = screw.daily ?? '-';
-                if (unitEl) unitEl.textContent = screw.unit ?? '-';
+                document.getElementById(config.targetEl).textContent = config.targetValue;
+                document.getElementById(config.statusEl).textContent = latestProd;
+            } catch (error) {
+                console.error("Dozer API error:", error);
+                document.getElementById(config.targetEl).textContent = config.targetValue;
+                document.getElementById(config.statusEl).textContent = "-";
             }
         }
 
+        async function loadPloughData() {
+            const config = PRODUCT_CONFIG.plough;
+
+            if (config.apiUrl) {
+                try {
+                    const response = await fetch(config.apiUrl + "?t=" + Date.now());
+                    if (!response.ok) throw new Error("โหลดข้อมูล Plough ไม่สำเร็จ");
+
+                    const result = await response.json();
+                    if (!result.success || !result.data || result.data.length < 2) {
+                        throw new Error(result.message || "ไม่พบข้อมูล Plough");
+                    }
+
+                    const rows = result.data;
+                    const idx = { target: 8, focus: 9 };
+
+                    const data = rows.slice(1)
+                        .filter(cols => cols.some(cell => String(cell).trim() !== ""))
+                        .map(cols => ({
+                            target: cols[idx.target],
+                            focus: cols[idx.focus]
+                        }));
+
+                    const latest = data[data.length - 1] || {};
+                    document.getElementById(config.targetEl).textContent = latest.target || "-";
+                    document.getElementById(config.focusEl).textContent = latest.focus || "-";
+                    return;
+                } catch (error) {
+                    console.error("Plough API error:", error);
+                }
+            }
+
+            const jsonData = await loadHtmlEmbeddedJson(config.fileName);
+            document.getElementById(config.targetEl).textContent = jsonData?.target ?? "-";
+            document.getElementById(config.focusEl).textContent = jsonData?.focus ?? "-";
+        }
+
+        async function loadScrewData() {
+            const config = PRODUCT_CONFIG.screw;
+
+            if (config.apiUrl) {
+                try {
+                    const response = await fetch(config.apiUrl + "?t=" + Date.now());
+                    if (!response.ok) throw new Error("โหลดข้อมูล Screw ไม่สำเร็จ");
+
+                    const result = await response.json();
+                    if (!result.success || !result.data || result.data.length < 2) {
+                        throw new Error(result.message || "ไม่พบข้อมูล Screw");
+                    }
+
+                    const rows = result.data;
+                    const idx = { daily: 8, unit: 9 };
+
+                    const data = rows.slice(1)
+                        .filter(cols => cols.some(cell => String(cell).trim() !== ""))
+                        .map(cols => ({
+                            daily: cols[idx.daily],
+                            unit: cols[idx.unit]
+                        }));
+
+                    const latest = data[data.length - 1] || {};
+                    document.getElementById(config.dailyEl).textContent = latest.daily || "-";
+                    document.getElementById(config.unitEl).textContent = latest.unit || "-";
+                    return;
+                } catch (error) {
+                    console.error("Screw API error:", error);
+                }
+            }
+
+            const jsonData = await loadHtmlEmbeddedJson(config.fileName);
+            document.getElementById(config.dailyEl).textContent = jsonData?.daily ?? "-";
+            document.getElementById(config.unitEl).textContent = jsonData?.unit ?? "-";
+        }
+
+        async function updateDashboardCards() {
+            await Promise.all([
+                loadDozerFromApi(),
+                loadPloughData(),
+                loadScrewData()
+            ]);
+        }
+
         function showPage(pageId) {
-            const mainPage = document.getElementById('mainPage');
-            const detailPage = document.getElementById('detailPage');
-            const kpiFrame = document.getElementById('kpiFrame');
-            const backButton = document.getElementById('backButton');
+            const mainPage = document.getElementById("mainPage");
+            const detailPage = document.getElementById("detailPage");
+            const kpiFrame = document.getElementById("kpiFrame");
+            const backButton = document.getElementById("backButton");
 
-            if (pageId === 'main') {
-                mainPage.classList.remove('hidden');
-                detailPage.classList.add('hidden');
-                backButton.classList.add('hidden');
-                kpiFrame.src = '';
+            if (pageId === "main") {
+                mainPage.classList.remove("hidden");
+                detailPage.classList.add("hidden");
+                backButton.classList.add("hidden");
+                kpiFrame.src = "";
             } else {
-                mainPage.classList.add('hidden');
-                detailPage.classList.remove('hidden');
-                backButton.classList.remove('hidden');
+                mainPage.classList.add("hidden");
+                detailPage.classList.remove("hidden");
+                backButton.classList.remove("hidden");
 
-                let fileName = '';
+                let fileName = "";
                 switch (pageId) {
-                    case 'dozer':
-                        fileName = 'KPI_Dozer.html';
+                    case "dozer":
+                        fileName = "KPI_Dozer.html";
                         break;
-                    case 'plough':
-                        fileName = 'KPI_Plough.html';
+                    case "plough":
+                        fileName = "KPI_Plough.html";
                         break;
-                    case 'screw':
-                        fileName = 'KPI_Screw.html';
+                    case "screw":
+                        fileName = "KPI_Screw.html";
                         break;
                 }
 
                 kpiFrame.src = fileName;
             }
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
         updateDashboardCards();
