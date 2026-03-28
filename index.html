@@ -24,7 +24,6 @@
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
         }
 
         .floating {
@@ -41,7 +40,6 @@
             width: 100%;
             height: calc(100vh - 80px);
             border: none;
-            border-radius: 1rem;
         }
 
         .hidden { display: none; }
@@ -61,50 +59,54 @@
 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 
     <!-- Dozer -->
-    <div class="glass-card rounded-3xl p-8 text-center">
-        <h3>KPI Dozer</h3>
+    <div onclick="showPage('dozer')" class="glass-card rounded-3xl p-8 text-center cursor-pointer">
+        <h3 class="text-xl font-bold mb-2">KPI Dozer</h3>
         <span id="dozer-target">-</span>
         <span id="dozer-status">-</span>
     </div>
 
     <!-- Plough -->
-    <div class="glass-card rounded-3xl p-8 text-center">
-        
-        <!-- 🔥 รูป -->
+    <div onclick="showPage('plough')" class="glass-card rounded-3xl p-8 text-center cursor-pointer">
+
+        <!-- 🔥 รูปเปลี่ยนตาม KPI -->
         <div class="floating mb-6 flex justify-center">
             <img id="plough-img"
                  src="pass_plough.png"
                  class="w-[200px] h-[200px] object-contain drop-shadow-xl">
         </div>
 
-        <h3>KPI Plough</h3>
+        <h3 class="text-xl font-bold mb-2">KPI Plough</h3>
 
-        <div>
-            <span id="plough-target">-</span>
-            <span id="plough-focus">-</span>
+        <div class="flex justify-around">
+            <div>
+                <span>Target</span><br>
+                <span id="plough-target">-</span>
+            </div>
+
+            <div>
+                <span>Today</span><br>
+                <span id="plough-focus">-</span>
+            </div>
         </div>
     </div>
 
     <!-- Screw -->
-    <div class="glass-card rounded-3xl p-8 text-center">
-        <h3>KPI Screw</h3>
+    <div onclick="showPage('screw')" class="glass-card rounded-3xl p-8 text-center cursor-pointer">
+        <h3 class="text-xl font-bold mb-2">KPI Screw</h3>
         <span id="screw-daily">-</span>
         <span id="screw-unit">-</span>
     </div>
 
 </div>
+
 </main>
+
+<div id="detailPage" class="hidden">
+    <iframe id="kpiFrame"></iframe>
+</div>
 
 <script>
 lucide.createIcons();
-
-const PRODUCT_CONFIG = {
-    plough: {
-        fileName: "KPI_Plough.html",
-        targetEl: "plough-target",
-        focusEl: "plough-focus"
-    }
-};
 
 async function loadHtmlEmbeddedJson(fileName) {
     const res = await fetch(fileName);
@@ -115,14 +117,13 @@ async function loadHtmlEmbeddedJson(fileName) {
 }
 
 async function loadPloughData() {
-    const config = PRODUCT_CONFIG.plough;
 
-    const jsonData = await loadHtmlEmbeddedJson(config.fileName);
+    const jsonData = await loadHtmlEmbeddedJson("KPI_Plough.html");
 
-    document.getElementById(config.targetEl).textContent = jsonData?.target ?? "-";
-    document.getElementById(config.focusEl).textContent = jsonData?.focus ?? "-";
+    document.getElementById("plough-target").textContent = jsonData?.target ?? "-";
+    document.getElementById("plough-focus").textContent = jsonData?.focus ?? "-";
 
-    // 🔥 เปลี่ยนรูปตาม KPI
+    // 🔥 logic เปลี่ยนรูป
     const today = parseFloat(jsonData?.focus || 0);
     const target = parseFloat(String(jsonData?.target || "0").replace('%',''));
 
@@ -133,6 +134,19 @@ async function loadPloughData() {
     } else {
         img.src = "fail_plough.png";
     }
+}
+
+function showPage(pageId) {
+    const mainPage = document.getElementById("mainPage");
+    const detailPage = document.getElementById("detailPage");
+    const frame = document.getElementById("kpiFrame");
+
+    mainPage.classList.add("hidden");
+    detailPage.classList.remove("hidden");
+
+    if (pageId === "plough") frame.src = "KPI_Plough.html";
+    if (pageId === "dozer") frame.src = "KPI_Dozer.html";
+    if (pageId === "screw") frame.src = "KPI_Screw.html";
 }
 
 loadPloughData();
