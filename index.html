@@ -22,20 +22,12 @@
             color: #f1f5f9;
             font-family: 'Quicksand', 'Prompt', sans-serif;
             margin: 0;
-            overflow-x: hidden;
         }
 
         .glass-card {
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .glass-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
         }
 
         .floating {
@@ -46,15 +38,6 @@
             0% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
             100% { transform: translateY(0px); }
-        }
-
-        .page-transition {
-            animation: fadeIn 0.4s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         iframe {
@@ -69,353 +52,138 @@
 </head>
 <body>
 
-    <!-- Main Navigation Bar -->
-    <nav class="sticky top-0 z-50 px-6 py-4 glass-card border-b border-white/5 mb-6">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="showPage('main')">
-                <div class="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-xl flex items-center justify-center shadow-lg">
-                    <i data-lucide="layout-dashboard" class="text-white w-6 h-6"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight tracking-tight">KPI Dashboard</h1>
-                    <p class="text-xs text-slate-400 font-light">Production Monitoring System</p>
-                </div>
-            </div>
-
-            <div id="backButton" class="hidden">
-                <button onclick="showPage('main')" class="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full transition-all text-sm font-medium">
-                    <i data-lucide="arrow-left" class="w-4 h-4 text-pink-300"></i>
-                    กลับหน้าหลัก
-                </button>
+<nav class="sticky top-0 z-50 px-6 py-4 glass-card mb-6">
+    <div class="flex justify-between items-center">
+        <div onclick="showPage('main')" class="cursor-pointer flex gap-3 items-center">
+            <div class="w-10 h-10 bg-indigo-400 rounded-xl"></div>
+            <div>
+                <h1 class="font-bold">KPI Dashboard</h1>
+                <p class="text-xs text-slate-400">Production Monitoring</p>
             </div>
         </div>
-    </nav>
 
-    <!-- Main Hub Content -->
-    <main id="mainPage" class="max-w-7xl mx-auto px-6 pb-12 page-transition">
-        <header class="mb-10 text-center md:text-left">
-            <h2 class="text-3xl font-bold mb-2">ยินดีต้อนรับ 👋</h2>
-            <p class="text-slate-400">เลือกดูรายงาน KPI รายวันของแต่ละส่วนงานด้านล่างนี้</p>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-            <!-- Dozer Card -->
-            <div onclick="showPage('dozer')" class="glass-card rounded-3xl p-8 cursor-pointer group">
-                <div class="flex flex-col items-center text-center">
-                    <div class="floating mb-6">
-                        <svg width="120" height="120" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="40" y="80" width="120" height="60" rx="10" fill="#ffb7c5" fill-opacity="0.8"/>
-                            <circle cx="60" cy="140" r="20" fill="#334155"/>
-                            <circle cx="140" cy="140" r="20" fill="#334155"/>
-                            <path d="M160 110L180 110L185 130H160V110Z" fill="#ffb7c5"/>
-                            <rect x="60" y="50" width="50" height="40" rx="5" stroke="#ffb7c5" stroke-width="4"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 group-hover:text-pink-300 transition-colors">KPI Dozer</h3>
-                    <p class="text-sm text-slate-400 mb-6">ติดตามการผลิตใบดันดิน (Dozer) ประจำวัน</p>
-                    <div class="w-full bg-slate-800/50 rounded-2xl p-4 flex justify-around">
-                        <div class="text-center">
-                            <span class="block text-xs text-slate-500 uppercase">Target</span>
-                            <span id="dozer-target" class="font-bold text-pink-300">-</span>
-                        </div>
-                        <div class="w-px bg-slate-700"></div>
-                        <div class="text-center">
-                            <span class="block text-xs text-slate-500 uppercase">Status</span>
-                            <span id="dozer-status" class="font-bold text-emerald-400">-</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Plough Card -->
-            <div onclick="showPage('plough')" class="glass-card rounded-3xl p-8 cursor-pointer group">
-                <div class="flex flex-col items-center text-center">
-                    <div class="floating mb-6" style="animation-delay: 0.5s">
-                        <svg width="120" height="120" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="45" y="70" width="95" height="12" rx="6" fill="#f97316" fill-opacity="0.95"/>
-                            <path d="M138 74 L178 58" stroke="#fb923c" stroke-width="8" stroke-linecap="round"/>
-                            <rect x="145" y="62" width="10" height="36" rx="4" fill="#f97316"/>
-                            <path d="M150 62 L162 50" stroke="#fdba74" stroke-width="5" stroke-linecap="round"/>
-                            <circle cx="38" cy="112" r="20" fill="#111827"/>
-                            <circle cx="38" cy="112" r="5" fill="#f97316"/>
-                            <path d="M50 96 L72 85" stroke="#ea580c" stroke-width="6" stroke-linecap="round"/>
-                            <line x1="52" y1="74" x2="52" y2="98" stroke="#94a3b8" stroke-width="3"/>
-                            <path d="M52 78 C48 82, 56 86, 52 90 C48 94, 56 98, 52 102" stroke="#cbd5e1" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                            <rect x="78" y="80" width="7" height="24" rx="3.5" fill="#334155"/>
-                            <rect x="108" y="80" width="7" height="24" rx="3.5" fill="#334155"/>
-                            <rect x="136" y="80" width="7" height="24" rx="3.5" fill="#334155"/>
-                            <rect x="162" y="80" width="7" height="24" rx="3.5" fill="#334155"/>
-                            <ellipse cx="82" cy="112" rx="14" ry="22" fill="#020617"/>
-                            <ellipse cx="112" cy="112" rx="14" ry="22" fill="#020617"/>
-                            <ellipse cx="140" cy="112" rx="14" ry="22" fill="#020617"/>
-                            <ellipse cx="166" cy="112" rx="12" ry="20" fill="#020617"/>
-                            <ellipse cx="82" cy="106" rx="5" ry="9" fill="#475569" fill-opacity="0.25"/>
-                            <ellipse cx="112" cy="106" rx="5" ry="9" fill="#475569" fill-opacity="0.25"/>
-                            <ellipse cx="140" cy="106" rx="5" ry="9" fill="#475569" fill-opacity="0.25"/>
-                            <ellipse cx="166" cy="106" rx="4" ry="8" fill="#475569" fill-opacity="0.25"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 group-hover:text-blue-300 transition-colors">KPI Plough</h3>
-                    <p class="text-sm text-slate-400 mb-6">ติดตามการผลิตโครงผาน (Plough) ประจำวัน</p>
-                    <div class="w-full bg-slate-800/50 rounded-2xl p-4 flex justify-around">
-                        <div class="text-center">
-                            <span class="block text-xs text-slate-500 uppercase">Target</span>
-                            <span id="plough-target" class="font-bold text-blue-300">-</span>
-                        </div>
-                        <div class="w-px bg-slate-700"></div>
-                        <div class="text-center">
-                            <span class="block text-xs text-slate-500 uppercase">Focus</span>
-                            <span id="plough-focus" class="font-bold text-purple-300">-</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Screw Card -->
-            <div onclick="showPage('screw')" class="glass-card rounded-3xl p-8 cursor-pointer group">
-                <div class="flex flex-col items-center text-center">
-                    <div class="floating mb-6" style="animation-delay: 1s">
-                        <svg width="120" height="120" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="85" y="40" width="30" height="100" rx="5" fill="#d0bfff" fill-opacity="0.8"/>
-                            <path d="M85 60L115 75M85 85L115 100M85 110L115 125" stroke="#334155" stroke-width="6" stroke-linecap="round"/>
-                            <circle cx="100" cy="150" r="15" fill="#d0bfff"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 group-hover:text-purple-300 transition-colors">KPI Screw</h3>
-                    <p class="text-sm text-slate-400 mb-6">ติดตามการผลิตใบเกลียว (Screw) ประจำวัน</p>
-                    <div class="w-full bg-slate-800/50 rounded-2xl p-4 flex justify-around">
-                        <div class="text-center">
-                            <span class="block text-xs text-slate-500 uppercase">Daily</span>
-                            <span id="screw-daily" class="font-bold text-purple-300">-</span>
-                        </div>
-                        <div class="w-px bg-slate-700"></div>
-                        <div class="text-center">
-                            <span class="block text-xs text-slate-500 uppercase">Unit</span>
-                            <span id="screw-unit" class="font-bold text-emerald-400">-</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- System Status Footer -->
-        <footer class="mt-16 text-center text-slate-500 text-xs">
-            <p>© 2024 KPI Monitoring Dashboard • Minimal Pastel Dark Edition</p>
-            <div class="flex justify-center gap-4 mt-4">
-                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> System Online</span>
-                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Data Updated</span>
-            </div>
-        </footer>
-    </main>
-
-    <!-- Detail Pages Container (Frames) -->
-    <div id="detailPage" class="hidden w-full h-full px-4 md:px-8 pb-8 page-transition">
-        <iframe id="kpiFrame" src="" title="KPI Detail"></iframe>
+        <button id="backButton" onclick="showPage('main')" class="hidden">← กลับ</button>
     </div>
+</nav>
 
-    <script>
-        lucide.createIcons();
+<main id="mainPage" class="px-6">
+    <div class="grid md:grid-cols-3 gap-6">
 
-        const PRODUCT_CONFIG = {
-            dozer: {
-                fileName: "KPI_Dozer.html",
-                apiUrl: "https://script.google.com/macros/s/AKfycbw3OPytEZL3Cf6Kh6whxXoA0SIAZLFmeiTfV7nyveB1nCYjryCyIz4jv_-Xr-Uq4hgm/exec",
-                type: "api",
-                targetEl: "dozer-target",
-                statusEl: "dozer-status",
-                targetValue: "90%"
-            },
-            plough: {
-                fileName: "KPI_Plough.html",
-                apiUrl: "",
-                type: "api-or-json",
-                targetEl: "plough-target",
-                focusEl: "plough-focus"
-            },
-            screw: {
-                fileName: "KPI_Screw.html",
-                apiUrl: "",
-                type: "api-or-json",
-                dailyEl: "screw-daily",
-                unitEl: "screw-unit"
-            }
-        };
+        <!-- DOZER -->
+        <div onclick="showPage('dozer')" class="glass-card p-6 cursor-pointer text-center">
+            <h3>KPI Dozer</h3>
+            <div class="mt-4">
+                <div>Target</div>
+                <div id="dozer-target">-</div>
+            </div>
+            <div class="mt-2">
+                <div>Status</div>
+                <div id="dozer-status">-</div>
+            </div>
+        </div>
 
-        function parseNum(val) {
-            if (!val) return 0;
-            return parseFloat(String(val).replace(/[%, ]/g, "")) || 0;
-        }
+        <!-- PLOUGH -->
+        <div onclick="showPage('plough')" class="glass-card p-6 cursor-pointer text-center">
+            <h3>KPI Plough</h3>
+            <div class="mt-4">
+                <div>Target</div>
+                <div id="plough-target">-</div>
+            </div>
+            <div class="mt-2">
+                <div>Focus</div>
+                <div id="plough-focus">-</div>
+            </div>
+        </div>
 
-        async function loadHtmlEmbeddedJson(fileName) {
-            try {
-                const response = await fetch(fileName, { cache: "no-store" });
-                if (!response.ok) throw new Error(`Failed to load ${fileName}: ${response.status}`);
+        <!-- SCREW -->
+        <div onclick="showPage('screw')" class="glass-card p-6 cursor-pointer text-center">
+            <h3>KPI Screw</h3>
+            <div class="mt-4">
+                <div>Daily</div>
+                <div id="screw-daily">-</div>
+            </div>
+            <div class="mt-2">
+                <div>Unit</div>
+                <div id="screw-unit">-</div>
+            </div>
+        </div>
 
-                const html = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, "text/html");
-                const jsonScript = doc.querySelector("#page-kpi-data");
+    </div>
+</main>
 
-                if (!jsonScript) return null;
-                return JSON.parse(jsonScript.textContent.trim());
-            } catch (error) {
-                console.error("Load embedded JSON error:", fileName, error);
-                return null;
-            }
-        }
+<div id="detailPage" class="hidden">
+    <iframe id="kpiFrame"></iframe>
+</div>
 
-        async function loadDozerFromApi() {
-            const config = PRODUCT_CONFIG.dozer;
+<script>
+lucide.createIcons();
 
-            try {
-                const response = await fetch(config.apiUrl + "?t=" + Date.now());
-                if (!response.ok) throw new Error("โหลดข้อมูล Dozer ไม่สำเร็จ");
+const CONFIG = {
+    dozer: {
+        api: "https://script.google.com/macros/s/AKfycbw3OPytEZL3Cf6Kh6whxXoA0SIAZLFmeiTfV7nyveB1nCYjryCyIz4jv_-Xr-Uq4hgm/exec",
+        target: "90%"
+    },
+    plough: {
+        api: "https://script.google.com/macros/s/AKfycbw4AN-QcUUt1vgTTuQArvShGjujdHMlafw1I5DCMs6BfLOJY6Yd-AL3_SMEYNyiUxl_og/exec",
+        target: "0.063"
+    },
+    screw: {
+        api: "https://script.google.com/macros/s/AKfycbya9u9yt0H0XljaLMhasjykxtEYuwLcfAE6UJv83NTB8A8tIsYPO10kT8qJT4YqZ3Sd/exec"
+    }
+};
 
-                const result = await response.json();
-                if (!result.success || !result.data || result.data.length < 2) {
-                    throw new Error(result.message || "ไม่พบข้อมูล Dozer");
-                }
+async function loadDozer(){
+    const res = await fetch(CONFIG.dozer.api);
+    const json = await res.json();
+    const rows = json.data;
+    const latest = rows[rows.length-1][8];
+    document.getElementById("dozer-target").innerText = CONFIG.dozer.target;
+    document.getElementById("dozer-status").innerText = latest + "%";
+}
 
-                const rows = result.data;
-                const idx = { prod: 8 };
+async function loadPlough(){
+    const res = await fetch(CONFIG.plough.api);
+    const json = await res.json();
+    const rows = json.data;
+    const latest = rows[rows.length-1][3];
+    document.getElementById("plough-target").innerText = CONFIG.plough.target;
+    document.getElementById("plough-focus").innerText = latest;
+}
 
-                const data = rows.slice(1)
-                    .filter(cols => cols.some(cell => String(cell).trim() !== ""))
-                    .map(cols => ({
-                        prod: parseNum(cols[idx.prod])
-                    }));
+async function loadScrew(){
+    const res = await fetch(CONFIG.screw.api);
+    const json = await res.json();
+    const rows = json.data;
+    const latest = rows[rows.length-1][2];
+    document.getElementById("screw-daily").innerText = latest;
+    document.getElementById("screw-unit").innerText = "PTS";
+}
 
-                const latestProd = data.length ? `${data[data.length - 1].prod}%` : "-";
+function showPage(id){
+    const main = document.getElementById("mainPage");
+    const detail = document.getElementById("detailPage");
+    const frame = document.getElementById("kpiFrame");
+    const back = document.getElementById("backButton");
 
-                document.getElementById(config.targetEl).textContent = config.targetValue;
-                document.getElementById(config.statusEl).textContent = latestProd;
-            } catch (error) {
-                console.error("Dozer API error:", error);
-                document.getElementById(config.targetEl).textContent = config.targetValue;
-                document.getElementById(config.statusEl).textContent = "-";
-            }
-        }
+    if(id==="main"){
+        main.classList.remove("hidden");
+        detail.classList.add("hidden");
+        back.classList.add("hidden");
+    }else{
+        main.classList.add("hidden");
+        detail.classList.remove("hidden");
+        back.classList.remove("hidden");
 
-        async function loadPloughData() {
-            const config = PRODUCT_CONFIG.plough;
+        frame.src = id==="dozer"?"KPI_Dozer.html":
+                    id==="plough"?"KPI_Plough.html":
+                    "KPI_Screw.html";
+    }
+}
 
-            if (config.apiUrl) {
-                try {
-                    const response = await fetch(config.apiUrl + "?t=" + Date.now());
-                    if (!response.ok) throw new Error("โหลดข้อมูล Plough ไม่สำเร็จ");
+loadDozer();
+loadPlough();
+loadScrew();
+</script>
 
-                    const result = await response.json();
-                    if (!result.success || !result.data || result.data.length < 2) {
-                        throw new Error(result.message || "ไม่พบข้อมูล Plough");
-                    }
-
-                    const rows = result.data;
-                    const idx = { target: 8, focus: 9 };
-
-                    const data = rows.slice(1)
-                        .filter(cols => cols.some(cell => String(cell).trim() !== ""))
-                        .map(cols => ({
-                            target: cols[idx.target],
-                            focus: cols[idx.focus]
-                        }));
-
-                    const latest = data[data.length - 1] || {};
-                    document.getElementById(config.targetEl).textContent = latest.target || "-";
-                    document.getElementById(config.focusEl).textContent = latest.focus || "-";
-                    return;
-                } catch (error) {
-                    console.error("Plough API error:", error);
-                }
-            }
-
-            const jsonData = await loadHtmlEmbeddedJson(config.fileName);
-            document.getElementById(config.targetEl).textContent = jsonData?.target ?? "-";
-            document.getElementById(config.focusEl).textContent = jsonData?.focus ?? "-";
-        }
-
-        async function loadScrewData() {
-            const config = PRODUCT_CONFIG.screw;
-
-            if (config.apiUrl) {
-                try {
-                    const response = await fetch(config.apiUrl + "?t=" + Date.now());
-                    if (!response.ok) throw new Error("โหลดข้อมูล Screw ไม่สำเร็จ");
-
-                    const result = await response.json();
-                    if (!result.success || !result.data || result.data.length < 2) {
-                        throw new Error(result.message || "ไม่พบข้อมูล Screw");
-                    }
-
-                    const rows = result.data;
-                    const idx = { daily: 8, unit: 9 };
-
-                    const data = rows.slice(1)
-                        .filter(cols => cols.some(cell => String(cell).trim() !== ""))
-                        .map(cols => ({
-                            daily: cols[idx.daily],
-                            unit: cols[idx.unit]
-                        }));
-
-                    const latest = data[data.length - 1] || {};
-                    document.getElementById(config.dailyEl).textContent = latest.daily || "-";
-                    document.getElementById(config.unitEl).textContent = latest.unit || "-";
-                    return;
-                } catch (error) {
-                    console.error("Screw API error:", error);
-                }
-            }
-
-            const jsonData = await loadHtmlEmbeddedJson(config.fileName);
-            document.getElementById(config.dailyEl).textContent = jsonData?.daily ?? "-";
-            document.getElementById(config.unitEl).textContent = jsonData?.unit ?? "-";
-        }
-
-        async function updateDashboardCards() {
-            await Promise.all([
-                loadDozerFromApi(),
-                loadPloughData(),
-                loadScrewData()
-            ]);
-        }
-
-        function showPage(pageId) {
-            const mainPage = document.getElementById("mainPage");
-            const detailPage = document.getElementById("detailPage");
-            const kpiFrame = document.getElementById("kpiFrame");
-            const backButton = document.getElementById("backButton");
-
-            if (pageId === "main") {
-                mainPage.classList.remove("hidden");
-                detailPage.classList.add("hidden");
-                backButton.classList.add("hidden");
-                kpiFrame.src = "";
-            } else {
-                mainPage.classList.add("hidden");
-                detailPage.classList.remove("hidden");
-                backButton.classList.remove("hidden");
-
-                let fileName = "";
-                switch (pageId) {
-                    case "dozer":
-                        fileName = "KPI_Dozer.html";
-                        break;
-                    case "plough":
-                        fileName = "KPI_Plough.html";
-                        break;
-                    case "screw":
-                        fileName = "KPI_Screw.html";
-                        break;
-                }
-
-                kpiFrame.src = fileName;
-            }
-
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        }
-
-        updateDashboardCards();
-    </script>
 </body>
 </html>
