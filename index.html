@@ -121,7 +121,7 @@
                         </div>
                         <div class="w-px bg-slate-700"></div>
                         <div class="text-center">
-                            <span class="block text-xs text-slate-500 uppercase">%Productivity วันนี้</span>
+                            <span class="block text-xs text-slate-500 uppercase">Productivity วันนี้</span>
                             <span id="dozer-status" class="font-bold text-emerald-400">-</span>
                         </div>
                     </div>
@@ -132,29 +132,7 @@
             <div onclick="showPage('plough')" class="glass-card rounded-3xl p-8 cursor-pointer group">
                 <div class="flex flex-col items-center text-center">
                     <div class="floating mb-6" style="animation-delay: 0.5s">
-                        <svg width="120" height="120" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="45" y="70" width="95" height="12" rx="6" fill="#f97316" fill-opacity="0.95"/>
-                            <path d="M138 74 L178 58" stroke="#fb923c" stroke-width="8" stroke-linecap="round"/>
-                            <rect x="145" y="62" width="10" height="36" rx="4" fill="#f97316"/>
-                            <path d="M150 62 L162 50" stroke="#fdba74" stroke-width="5" stroke-linecap="round"/>
-                            <circle cx="38" cy="112" r="20" fill="#111827"/>
-                            <circle cx="38" cy="112" r="5" fill="#f97316"/>
-                            <path d="M50 96 L72 85" stroke="#ea580c" stroke-width="6" stroke-linecap="round"/>
-                            <line x1="52" y1="74" x2="52" y2="98" stroke="#94a3b8" stroke-width="3"/>
-                            <path d="M52 78 C48 82, 56 86, 52 90 C48 94, 56 98, 52 102" stroke="#cbd5e1" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                            <rect x="78" y="80" width="7" height="24" rx="3.5" fill="#334155"/>
-                            <rect x="108" y="80" width="7" height="24" rx="3.5" fill="#334155"/>
-                            <rect x="136" y="80" width="7" height="24" rx="3.5" fill="#334155"/>
-                            <rect x="162" y="80" width="7" height="24" rx="3.5" fill="#334155"/>
-                            <ellipse cx="82" cy="112" rx="14" ry="22" fill="#020617"/>
-                            <ellipse cx="112" cy="112" rx="14" ry="22" fill="#020617"/>
-                            <ellipse cx="140" cy="112" rx="14" ry="22" fill="#020617"/>
-                            <ellipse cx="166" cy="112" rx="12" ry="20" fill="#020617"/>
-                            <ellipse cx="82" cy="106" rx="5" ry="9" fill="#475569" fill-opacity="0.25"/>
-                            <ellipse cx="112" cy="106" rx="5" ry="9" fill="#475569" fill-opacity="0.25"/>
-                            <ellipse cx="140" cy="106" rx="5" ry="9" fill="#475569" fill-opacity="0.25"/>
-                            <ellipse cx="166" cy="106" rx="4" ry="8" fill="#475569" fill-opacity="0.25"/>
-                        </svg>
+                        <img id="plough-img" src="pass_plough.png" alt="Plough status" class="w-[120px] h-[120px] object-contain">
                     </div>
                     <h3 class="text-xl font-bold mb-2 group-hover:text-blue-300 transition-colors">KPI Plough</h3>
                     <p class="text-sm text-slate-400 mb-6">ติดตามการผลิตโครงผาน (Plough) ประจำวัน</p>
@@ -165,7 +143,7 @@
                         </div>
                         <div class="w-px bg-slate-700"></div>
                         <div class="text-center">
-                            <span class="block text-xs text-slate-500 uppercase">Productivity วันนี้</span>
+                            <span class="block text-xs text-slate-500 uppercase">Focus</span>
                             <span id="plough-focus" class="font-bold text-purple-300">-</span>
                         </div>
                     </div>
@@ -186,12 +164,12 @@
                     <p class="text-sm text-slate-400 mb-6">ติดตามการผลิตใบเกลียว (Screw) ประจำวัน</p>
                     <div class="w-full bg-slate-800/50 rounded-2xl p-4 flex justify-around">
                         <div class="text-center">
-                            <span class="block text-xs text-slate-500 uppercase">Target</span>
+                            <span class="block text-xs text-slate-500 uppercase">Daily</span>
                             <span id="screw-daily" class="font-bold text-purple-300">-</span>
                         </div>
                         <div class="w-px bg-slate-700"></div>
                         <div class="text-center">
-                            <span class="block text-xs text-slate-500 uppercase">Productivity วันนี้</span>
+                            <span class="block text-xs text-slate-500 uppercase">Unit</span>
                             <span id="screw-unit" class="font-bold text-emerald-400">-</span>
                         </div>
                     </div>
@@ -339,6 +317,19 @@
 
                     document.getElementById(config.targetEl).textContent = "0.063";
                     document.getElementById(config.focusEl).textContent = currentProd;
+
+                    const img = document.getElementById("plough-img");
+                    const prodValue = parseFloat(currentProd || 0);
+                    const targetValue = 0.063;
+
+                    if (img) {
+                        if (prodValue >= targetValue) {
+                            img.src = "pass_plough.png";
+                        } else {
+                            img.src = "fail_plough.png";
+                        }
+                    }
+
                     return;
                 } catch (error) {
                     console.error("Plough API error:", error);
@@ -348,6 +339,18 @@
             const jsonData = await loadHtmlEmbeddedJson(config.fileName);
             document.getElementById(config.targetEl).textContent = jsonData?.target ?? "-";
             document.getElementById(config.focusEl).textContent = jsonData?.focus ?? "-";
+
+            const img = document.getElementById("plough-img");
+            const prodValue = parseFloat(jsonData?.focus || 0);
+            const targetValue = 0.063;
+
+            if (img) {
+                if (prodValue >= targetValue) {
+                    img.src = "pass_plough.png";
+                } else {
+                    img.src = "fail_plough.png";
+                }
+            }
         }
 
         async function loadScrewData() {
