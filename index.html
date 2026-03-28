@@ -131,9 +131,14 @@
             <!-- Plough Card -->
             <div onclick="showPage('plough')" class="glass-card rounded-3xl p-8 cursor-pointer group">
                 <div class="flex flex-col items-center text-center">
-                    <div class="floating mb-6 flex justify-center" style="animation-delay: 0.5s">
+                    <div class="floating mb-4 flex justify-center" style="animation-delay: 0.5s">
                         <img id="plough-img" src="pass_plough.png" alt="Plough KPI status" class="w-[180px] h-[180px] object-contain drop-shadow-xl">
                     </div>
+
+                    <div id="plough-kpi-status" class="mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-700 text-slate-300">
+                        รอข้อมูล
+                    </div>
+
                     <h3 class="text-xl font-bold mb-2 group-hover:text-blue-300 transition-colors">KPI Plough</h3>
                     <p class="text-sm text-slate-400 mb-6">ติดตามการผลิตโครงผาน (Plough) ประจำวัน</p>
                     <div class="w-full bg-slate-800/50 rounded-2xl p-4 flex justify-around">
@@ -319,15 +324,20 @@
                     document.getElementById(config.focusEl).textContent = currentProd;
 
                     const img = document.getElementById("plough-img");
+                    const statusEl = document.getElementById("plough-kpi-status");
                     const prodValue = parseFloat(currentProd || 0);
                     const targetValue = 0.063;
+                    const isPass = prodValue >= targetValue;
 
                     if (img) {
-                        if (prodValue >= targetValue) {
-                            img.src = "pass_plough.png";
-                        } else {
-                            img.src = "fail_plough.png";
-                        }
+                        img.src = isPass ? "pass_plough.png" : "fail_plough.png";
+                    }
+
+                    if (statusEl) {
+                        statusEl.textContent = isPass ? "ผ่าน" : "ไม่ผ่าน";
+                        statusEl.className = isPass
+                            ? "mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300"
+                            : "mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300";
                     }
 
                     return;
@@ -341,15 +351,20 @@
             document.getElementById(config.focusEl).textContent = jsonData?.focus ?? "-";
 
             const img = document.getElementById("plough-img");
+            const statusEl = document.getElementById("plough-kpi-status");
             const prodValue = parseFloat(jsonData?.focus || 0);
             const targetValue = 0.063;
+            const isPass = prodValue >= targetValue;
 
             if (img) {
-                if (prodValue >= targetValue) {
-                    img.src = "pass_plough.png";
-                } else {
-                    img.src = "fail_plough.png";
-                }
+                img.src = isPass ? "pass_plough.png" : "fail_plough.png";
+            }
+
+            if (statusEl) {
+                statusEl.textContent = isPass ? "ผ่าน" : "ไม่ผ่าน";
+                statusEl.className = isPass
+                    ? "mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300"
+                    : "mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300";
             }
         }
 
