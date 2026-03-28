@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today's Production Focus</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.1.0"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+        
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --pass-green: #22c55e;
+            --fail-pastel-red: #f87171;
+            --text-main: #f8fafc;
+            --accent-blue: #60a5fa;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Kanit', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+        }
+
+        .kpi-card-main {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: 250px;
+            transition: all 0.3s ease;
+        }
+
+        .status-pass {
+            border: 4px solid var(--pass-green);
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+        }
+
+        .status-fail {
+            border: 4px solid var(--fail-pastel-red);
+            box-shadow: 0 0 40px rgba(248, 113, 113, 0.3);
+        }
+
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: rgba(255, 255, 255, 0.05);
+            text-align: left;
+            padding: 12px;
+            color: var(--accent-blue);
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .refresh-btn {
+            background: var(--accent-blue);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Kanit', sans-serif;
+        }
+        
+        .today-highlight {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%);
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 8px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+    </style>
+</head>
+<body class="custom-scroll">
+
+    <header class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
+                Daily Production Monitor
+            </h1>
+            <p class="text-slate-400">Standard: 0.063 | วันปัจจุบัน (Future Dates = -)</p>
+        </div>
+        
+        <div class="glass-card p-4 flex items-center gap-4 flex-wrap justify-center">
+            <button id="refreshBtn" class="refresh-btn">อัปเดตข้อมูล</button>
+            <span id="updateStatus" class="text-sm text-slate-400">ยังไม่เคยอัปเดต</span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto space-y-6">
+        
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <div class="lg:col-span-5 glass-card kpi-card-main today-highlight" id="today-main-card">
+                <div class="mb-2">
+                    <span class="bg-blue-500/20 text-blue-400 px-4 py-1 rounded-full text-xs font-medium uppercase">DATE STATUS (TODAY)</span>
+                    <h3 id="display-date" class="text-2xl font-semibold mt-3 text-slate-200">-- / -- / ----</h3>
+                </div>
+                
+                <div class="py-4">
+                    <p class="text-slate-400 text-sm uppercase tracking-widest mb-1">CURRENT PRODUCTIVITY</p>
+                    <h2 id="today-prod" class="text-8xl font-black">--</h2>
+                    <p class="text-slate-500 mt-2 font-medium">Standard Target: 0.063</p>
+                </div>
+
+                <div id="status-badge" class="mt-4 px-10 py-3 rounded-2xl font-black text-2xl uppercase tracking-tighter hidden">
+                    PASS
+                </div>
+            </div>
+
+            <div class="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card p-6 flex flex-col justify-center items-center text-center">
+                    <i data-lucide="package" id="today-out-icon" class="mb-2"></i>
+                    <p class="text-slate-400 text-sm">ส่งเข้าคลังทั้งหมด</p>
+                    <h4 id="today-out" class="text-4xl font-bold mt-1">--</h4>
+                </div>
+
+                <div class="glass-card p-6 flex flex-col justify-center items-center text-center">
+                    <i data-lucide="archive" id="today-inv-icon" class="mb-2"></i>
+                    <p class="text-slate-400 text-sm">ส่งเข้าคลังวันนี้</p>
+                    <h4 id="today-inv" class="text-4xl font-bold mt-1">0</h4>
+                </div>
+
+                <div class="glass-card p-6 flex flex-col justify-center items-center text-center">
+                    <i data-lucide="clock" class="text-purple-400 mb-2"></i>
+                    <p class="text-slate-400 text-sm">Manhour ที่ใช้</p>
+                    <h4 id="today-mh" class="text-4xl font-bold mt-1 text-purple-300">--</h4>
+                </div>
+
+                <div class="glass-card p-6 flex flex-col justify-center items-center text-center">
+                    <i data-lucide="check-circle" id="today-eff-icon" class="mb-2"></i>
+                    <p class="text-slate-400 text-sm">Efficiency</p>
+                    <h4 id="today-eff" class="text-4xl font-bold mt-1">-- %</h4>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 glass-card p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-slate-300">Productivity Trend (เป้าหมาย 0.063)</h3>
+                </div>
+                <div style="height: 300px;">
+                    <canvas id="historyChart"></canvas>
+                </div>
+            </div>
+            <div class="lg:col-span-1 glass-card p-6">
+                <h3 class="text-lg font-medium mb-4 text-slate-300">ประวัติการผลิตรายวัน</h3>
+                <div class="table-container max-h-[300px] overflow-y-auto custom-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>วันที่</th>
+                                <th>Prod.</th>
+                                <th>สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="miniTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+        Chart.register(ChartDataLabels);
+
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4AN-QcUUt1vgTTuQArvShGjujdHMlafw1I5DCMs6BfLOJY6Yd-AL3_SMEYNyiUxl_og/exec";
+        const TARGET = 0.063;
+        const EFF_TARGET = 90;
+        const AUTO_REFRESH_MS = 60 * 60 * 1000;
+
+        let historyChart;
+
+        const parseThaiDate = (dateStr) => {
+            const parts = String(dateStr || "").split('/');
+            if (parts.length !== 3) return new Date(0);
+            return new Date(parts[2], parts[1] - 1, parts[0]);
+        };
+
+        const getSystemTodayStr = () => {
+            const now = new Date();
+            const d = now.getDate().toString().padStart(2, '0');
+            const m = (now.getMonth() + 1).toString().padStart(2, '0');
+            const y = now.getFullYear();
+            return `${d}/${m}/${y}`;
+        };
+
+        const formatDateTime = (date) => {
+            const d = date.getDate().toString().padStart(2, '0');
+            const m = (date.getMonth() + 1).toString().padStart(2, '0');
+            const y = date.getFullYear();
+            const hh = date.getHours().toString().padStart(2, '0');
+            const mm = date.getMinutes().toString().padStart(2, '0');
+            const ss = date.getSeconds().toString().padStart(2, '0');
+            return `${d}/${m}/${y} ${hh}:${mm}:${ss}`;
+        };
+
+        const setUpdateStatus = (text, colorClass = 'text-slate-400') => {
+            const el = document.getElementById('updateStatus');
+            el.className = `text-sm ${colorClass}`;
+            el.textContent = text;
+        };
+
+        const systemTodayDate = new Date();
+        systemTodayDate.setHours(0, 0, 0, 0);
+
+        document.getElementById('display-date').innerText = getSystemTodayStr();
+        document.getElementById('refreshBtn').addEventListener('click', () => fetchSheetData(true));
+
+        window.onload = () => {
+            fetchSheetData(false);
+            setInterval(() => fetchSheetData(false), AUTO_REFRESH_MS);
+        };
+
+        function formatInventory(val, isFuture) {
+            if (isFuture) return "0";
+            if (val === null || val === undefined || val === "" || isNaN(val)) return "0";
+            return parseFloat(val).toLocaleString();
+        }
+
+        function formatOther(val, suffix = "", isFuture) {
+            if (isFuture) return "-";
+            if (val === null || val === undefined || val === "" || val === 0 || val === "0") return "-";
+            return Number(val).toLocaleString() + suffix;
+        }
+
+        function formatOutput(val, isFuture) {
+            if (isFuture) return "-";
+            if (val === null || val === undefined || val === "" || isNaN(val)) return "0";
+            return Number(val).toLocaleString();
+        }
+
+        async function fetchSheetData(isManual = false) {
+            try {
+                setUpdateStatus("กำลังอัปเดตข้อมูล...", "text-yellow-400");
+
+                const response = await fetch(WEB_APP_URL + "?t=" + Date.now());
+                const json = await response.json();
+
+                if (!json.success || !json.data || json.data.length < 2) {
+                    throw new Error(json.message || "ไม่พบข้อมูล");
+                }
+
+                parseSheetRows(json.data);
+
+                const now = new Date();
+                setUpdateStatus(`อัปเดตล่าสุด: ${formatDateTime(now)}`, "text-emerald-400");
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                document.getElementById('display-date').innerText = "โหลดข้อมูลไม่สำเร็จ";
+                document.getElementById('today-prod').innerText = "--";
+                setUpdateStatus("อัปเดตไม่สำเร็จ", "text-red-400");
+            }
+        }
+
+        function normalizeHeader(str) {
+            return String(str || "")
+                .replace(/\uFEFF/g, "")
+                .trim()
+                .toLowerCase();
+        }
+
+        function parseSheetRows(rows) {
+            const headers = rows[0].map(h => String(h).trim());
+            const normalizedHeaders = headers.map(normalizeHeader);
+
+            const findIndex = (names) => normalizedHeaders.findIndex(h => names.includes(h));
+
+            const idx = {
+                date: findIndex(["วันที่", "date"]),
+                inventory: findIndex(["จำนวนส่งเข้าคลัง", "inventory", "stock", "คลัง"]),
+                manhour: findIndex(["actual_manhour", "manhour", "mh", "actual manhour"]),
+                productivity: findIndex(["productivity", "prod"]),
+                targetText: findIndex(["เป้าหมาย", "target"])
+            };
+
+            if (idx.date === -1 || idx.inventory === -1 || idx.manhour === -1 || idx.productivity === -1) {
+                console.log("HEADERS:", headers);
+                throw new Error("ไม่พบหัวคอลัมน์ที่ต้องใช้: วันที่ / จำนวนส่งเข้าคลัง / Actual_Manhour / Productivity");
+            }
+
+            const data = rows.slice(1).map(r => {
+                const dateStr = String(r[idx.date] || "").trim();
+                const rowDate = parseThaiDate(dateStr);
+                const isFuture = rowDate > systemTodayDate;
+
+                const inventory = parseFloat(String(r[idx.inventory] || "0").replace(/,/g, "")) || 0;
+                const manhour = parseFloat(String(r[idx.manhour] || "0").replace(/,/g, "")) || 0;
+                const productivity = parseFloat(String(r[idx.productivity] || "0").replace(/,/g, "")) || 0;
+                const targetText = idx.targetText !== -1 ? String(r[idx.targetText] || "").trim() : "";
+
+                return {
+                    date: dateStr,
+                    rawDate: rowDate,
+                    isFuture,
+                    output: isFuture ? 0 : inventory,
+                    inventory: isFuture ? 0 : inventory,
+                    mh: isFuture ? 0 : manhour,
+                    eff: isFuture ? 0 : Number((productivity / TARGET * 100).toFixed(2)),
+                    prod: isFuture ? 0 : productivity,
+                    targetText
+                };
+            }).filter(d => d.date);
+
+            data.sort((a, b) => a.rawDate - b.rawDate);
+            updateUI(data);
+        }
+
+        function sumMonthInventory(data, todayDate) {
+            const currentMonth = todayDate.getMonth();
+            const currentYear = todayDate.getFullYear();
+
+            return data
+                .filter(d =>
+                    d.rawDate &&
+                    d.rawDate.getMonth() === currentMonth &&
+                    d.rawDate.getFullYear() === currentYear &&
+                    !d.isFuture
+                )
+                .reduce((sum, d) => sum + (Number(d.inventory) || 0), 0);
+        }
+
+        function updateUI(data) {
+            const todayStr = getSystemTodayStr();
+            let todayData = data.find(d => d.date === todayStr);
+
+            if (!todayData) {
+                todayData = {
+                    date: todayStr,
+                    prod: 0,
+                    output: 0,
+                    inventory: 0,
+                    mh: 0,
+                    eff: 0,
+                    isFuture: true,
+                    targetText: ""
+                };
+            }
+
+            const monthlyOutput = sumMonthInventory(data, systemTodayDate);
+
+            document.getElementById('display-date').innerText = todayData.date;
+            document.getElementById('today-prod').innerText = todayData.isFuture ? "0.000" : todayData.prod.toFixed(3);
+
+            const todayOutEl = document.getElementById('today-out');
+            const todayOutIconEl = document.getElementById('today-out-icon');
+            todayOutEl.innerText = formatOutput(monthlyOutput, false);
+
+            if (Number(monthlyOutput) <= 0) {
+                todayOutEl.className = "text-4xl font-bold mt-1 text-yellow-300";
+                todayOutIconEl.setAttribute("color", "#facc15");
+                todayOutIconEl.className = "mb-2";
+            } else {
+                todayOutEl.className = "text-4xl font-bold mt-1 text-blue-300";
+                todayOutIconEl.setAttribute("color", "#60a5fa");
+                todayOutIconEl.className = "mb-2";
+            }
+
+            const todayInvEl = document.getElementById('today-inv');
+            const todayInvIconEl = document.getElementById('today-inv-icon');
+            todayInvEl.innerText = formatInventory(todayData.inventory, todayData.isFuture);
+
+            if (todayData.isFuture || Number(todayData.inventory) <= 0) {
+                todayInvEl.className = "text-4xl font-bold mt-1 text-yellow-300";
+                todayInvIconEl.setAttribute("color", "#facc15");
+                todayInvIconEl.className = "mb-2";
+            } else {
+                todayInvEl.className = "text-4xl font-bold mt-1 text-green-300";
+                todayInvIconEl.setAttribute("color", "#4ade80");
+                todayInvIconEl.className = "mb-2";
+            }
+
+            document.getElementById('today-mh').innerText = formatOther(todayData.mh, "", todayData.isFuture);
+
+            const todayEffEl = document.getElementById('today-eff');
+            const todayEffIconEl = document.getElementById('today-eff-icon');
+            todayEffEl.innerText = formatOther(todayData.eff, " %", todayData.isFuture);
+
+            if (!todayData.isFuture && Number(todayData.eff) < EFF_TARGET) {
+                todayEffEl.className = "text-4xl font-bold mt-1 text-red-300";
+                todayEffIconEl.setAttribute("color", "#f87171");
+                todayEffIconEl.className = "mb-2";
+            } else {
+                todayEffEl.className = "text-4xl font-bold mt-1 text-emerald-300";
+                todayEffIconEl.setAttribute("color", "#34d399");
+                todayEffIconEl.className = "mb-2";
+            }
+
+            const prodVal = parseFloat(todayData.prod);
+            const isPass = !todayData.isFuture && prodVal >= TARGET;
+            const card = document.getElementById('today-main-card');
+            const badge = document.getElementById('status-badge');
+
+            if (isPass) {
+                card.className = "lg:col-span-5 glass-card kpi-card-main today-highlight status-pass";
+                badge.innerText = "ผ่าน";
+                badge.className = "mt-4 px-10 py-3 rounded-2xl font-black text-2xl uppercase bg-green-500 text-white block";
+            } else {
+                card.className = "lg:col-span-5 glass-card kpi-card-main today-highlight status-fail";
+                badge.innerText = "ไม่ผ่าน";
+                badge.className = "mt-4 px-10 py-3 rounded-2xl font-black text-2xl uppercase bg-[#f87171] text-white block";
+            }
+
+            renderChart(data);
+
+            document.getElementById('miniTable').innerHTML = [...data].reverse().map(d => `
+                <tr class="${d.date === todayStr ? 'bg-blue-500/10' : ''}">
+                    <td>${d.date} ${d.date === todayStr ? '<span class="text-[8px] text-blue-400">(TODAY)</span>' : ''}</td>
+                    <td class="font-bold">${d.isFuture ? '-' : d.prod.toFixed(3)}</td>
+                    <td>
+                        ${d.isFuture ? '-' : `
+                        <span class="px-2 py-1 rounded-md text-[10px] font-black ${parseFloat(d.prod) >= TARGET ? 'bg-green-500/20 text-green-400' : 'bg-red-400/20 text-red-400'}">
+                            ${parseFloat(d.prod) >= TARGET ? 'ผ่าน' : 'ไม่ผ่าน'}
+                        </span>
+                        `}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderChart(data) {
+            const ctx = document.getElementById('historyChart').getContext('2d');
+            if (historyChart) historyChart.destroy();
+
+            const chartData = data.map(d => d.isFuture ? 0 : d.prod);
+
+            historyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.date),
+                    datasets: [{
+                        label: 'Productivity',
+                        data: chartData,
+                        backgroundColor: data.map(d => {
+                            if (d.isFuture) return 'rgba(255,255,255,0.05)';
+                            return parseFloat(d.prod) >= TARGET ? '#22c55e' : '#f87171';
+                        }),
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#cbd5e1',
+                            font: { size: 9, family: 'Kanit', weight: 'bold' },
+                            formatter: (v, context) => {
+                                const d = data[context.dataIndex];
+                                return (d.isFuture || v <= 0) ? '' : v.toFixed(3);
+                            }
+                        },
+                        annotation: {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    yMin: TARGET,
+                                    yMax: TARGET,
+                                    borderColor: '#fbbf24',
+                                    borderWidth: 2,
+                                    borderDash: [6, 6],
+                                    label: {
+                                        display: true,
+                                        content: 'STD 0.063',
+                                        position: 'end',
+                                        backgroundColor: '#fbbf24',
+                                        color: '#000',
+                                        font: { size: 10, weight: 'bold' }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#64748b' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8', font: { size: 10 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
