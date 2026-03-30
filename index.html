@@ -103,15 +103,14 @@
             <!-- Dozer Card -->
             <div onclick="showPage('dozer')" class="glass-card rounded-3xl p-8 cursor-pointer group">
                 <div class="flex flex-col items-center text-center">
-                    <div class="floating mb-6">
-                        <svg width="120" height="120" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="40" y="80" width="120" height="60" rx="10" fill="#ffb7c5" fill-opacity="0.8"/>
-                            <circle cx="60" cy="140" r="20" fill="#334155"/>
-                            <circle cx="140" cy="140" r="20" fill="#334155"/>
-                            <path d="M160 110L180 110L185 130H160V110Z" fill="#ffb7c5"/>
-                            <rect x="60" y="50" width="50" height="40" rx="5" stroke="#ffb7c5" stroke-width="4"/>
-                        </svg>
+                    <div class="floating mb-4 flex justify-center">
+                        <img id="dozer-img" src="pass_dozer.png" alt="Dozer KPI status" class="w-[180px] h-[180px] object-contain drop-shadow-xl">
                     </div>
+
+                    <div id="dozer-kpi-status" class="mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-700 text-slate-300">
+                        รอข้อมูล
+                    </div>
+
                     <h3 class="text-xl font-bold mb-2 group-hover:text-pink-300 transition-colors">KPI Dozer</h3>
                     <p class="text-sm text-slate-400 mb-6">ติดตามการผลิตใบดันดิน (Dozer) ประจำวัน</p>
                     <div class="w-full bg-slate-800/50 rounded-2xl p-4 flex justify-around">
@@ -158,13 +157,14 @@
             <!-- Screw Card -->
             <div onclick="showPage('screw')" class="glass-card rounded-3xl p-8 cursor-pointer group">
                 <div class="flex flex-col items-center text-center">
-                    <div class="floating mb-6" style="animation-delay: 1s">
-                        <svg width="120" height="120" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="85" y="40" width="30" height="100" rx="5" fill="#d0bfff" fill-opacity="0.8"/>
-                            <path d="M85 60L115 75M85 85L115 100M85 110L115 125" stroke="#334155" stroke-width="6" stroke-linecap="round"/>
-                            <circle cx="100" cy="150" r="15" fill="#d0bfff"/>
-                        </svg>
+                    <div class="floating mb-4 flex justify-center" style="animation-delay: 1s">
+                        <img id="screw-img" src="pass_screw.png" alt="Screw KPI status" class="w-[180px] h-[180px] object-contain drop-shadow-xl">
                     </div>
+
+                    <div id="screw-kpi-status" class="mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-700 text-slate-300">
+                        รอข้อมูล
+                    </div>
+
                     <h3 class="text-xl font-bold mb-2 group-hover:text-purple-300 transition-colors">KPI Screw</h3>
                     <p class="text-sm text-slate-400 mb-6">ติดตามการผลิตใบเกลียว (Screw) ประจำวัน</p>
                     <div class="w-full bg-slate-800/50 rounded-2xl p-4 flex justify-around">
@@ -205,24 +205,35 @@
             dozer: {
                 fileName: "KPI_Dozer.html",
                 apiUrl: "https://script.google.com/macros/s/AKfycbw3OPytEZL3Cf6Kh6whxXoA0SIAZLFmeiTfV7nyveB1nCYjryCyIz4jv_-Xr-Uq4hgm/exec",
-                type: "api",
                 targetEl: "dozer-target",
-                statusEl: "dozer-status",
-                targetValue: "90%"
+                valueEl: "dozer-status",
+                statusEl: "dozer-kpi-status",
+                imgEl: "dozer-img",
+                targetValue: 90,
+                passImg: "pass_dozer.png",
+                failImg: "fail_dozer.png"
             },
             plough: {
                 fileName: "KPI_Plough.html",
                 apiUrl: "https://script.google.com/macros/s/AKfycbw4AN-QcUUt1vgTTuQArvShGjujdHMlafw1I5DCMs6BfLOJY6Yd-AL3_SMEYNyiUxl_og/exec",
-                type: "api-or-json",
                 targetEl: "plough-target",
-                focusEl: "plough-focus"
+                valueEl: "plough-focus",
+                statusEl: "plough-kpi-status",
+                imgEl: "plough-img",
+                targetValue: 0.063,
+                passImg: "pass_plough.png",
+                failImg: "fail_plough01.png"
             },
             screw: {
                 fileName: "KPI_Screw.html",
                 apiUrl: "https://script.google.com/macros/s/AKfycbya9u9yt0H0XljaLMhasjykxtEYuwLcfAE6UJv83NTB8A8tIsYPO10kT8qJT4YqZ3Sd/exec",
-                type: "api-or-json",
-                dailyEl: "screw-daily",
-                unitEl: "screw-unit"
+                targetEl: "screw-daily",
+                valueEl: "screw-unit",
+                statusEl: "screw-kpi-status",
+                imgEl: "screw-img",
+                targetValue: 9.84,
+                passImg: "pass_screw.png",
+                failImg: "fail_screw.png"
             }
         };
 
@@ -241,6 +252,19 @@
             } catch (error) {
                 console.error("Load embedded JSON error:", fileName, error);
                 return null;
+            }
+        }
+
+        function setStatusUI(statusEl, imgEl, isPass, passImg, failImg) {
+            if (imgEl) {
+                imgEl.src = isPass ? passImg : failImg;
+            }
+
+            if (statusEl) {
+                statusEl.textContent = isPass ? "ผ่าน" : "KPI ไม่ผ่านสักที จะโมโหแล้วนะ";
+                statusEl.className = isPass
+                    ? "mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300"
+                    : "mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300";
             }
         }
 
@@ -265,14 +289,22 @@
                         prod: parseFloat(String(cols[idx.prod] || "0").replace(/[%, ]/g, "")) || 0
                     }));
 
-                const latestProd = data.length ? `${data[data.length - 1].prod}%` : "-";
+                const latestProd = data.length ? data[data.length - 1].prod : 0;
 
-                document.getElementById(config.targetEl).textContent = config.targetValue;
-                document.getElementById(config.statusEl).textContent = latestProd;
+                document.getElementById(config.targetEl).textContent = `${config.targetValue}%`;
+                document.getElementById(config.valueEl).textContent = latestProd ? `${latestProd}%` : "-";
+
+                setStatusUI(
+                    document.getElementById(config.statusEl),
+                    document.getElementById(config.imgEl),
+                    latestProd >= config.targetValue,
+                    config.passImg,
+                    config.failImg
+                );
             } catch (error) {
                 console.error("Dozer API error:", error);
-                document.getElementById(config.targetEl).textContent = config.targetValue;
-                document.getElementById(config.statusEl).textContent = "-";
+                document.getElementById(config.targetEl).textContent = `${config.targetValue}%`;
+                document.getElementById(config.valueEl).textContent = "-";
             }
         }
 
@@ -317,28 +349,19 @@
                     const latestRow = data[data.length - 1];
 
                     const currentProd = todayRow
-                        ? todayRow.productivity.toFixed(3)
-                        : (latestRow ? latestRow.productivity.toFixed(3) : "-");
+                        ? todayRow.productivity
+                        : (latestRow ? latestRow.productivity : 0);
 
                     document.getElementById(config.targetEl).textContent = "0.063";
-                    document.getElementById(config.focusEl).textContent = currentProd;
+                    document.getElementById(config.valueEl).textContent = currentProd ? currentProd.toFixed(3) : "-";
 
-                    const img = document.getElementById("plough-img");
-                    const statusEl = document.getElementById("plough-kpi-status");
-                    const prodValue = parseFloat(currentProd || 0);
-                    const targetValue = 0.063;
-                    const isPass = prodValue >= targetValue;
-
-                    if (img) {
-                        img.src = isPass ? "pass_plough.png" : "fail_plough01.png";
-                    }
-
-                    if (statusEl) {
-                        statusEl.textContent = isPass ? "ผ่าน" : "KPI ไม่ผ่านสักที จะโมโหแล้วนะ";
-                        statusEl.className = isPass
-                            ? "mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300"
-                            : "mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300";
-                    }
+                    setStatusUI(
+                        document.getElementById(config.statusEl),
+                        document.getElementById(config.imgEl),
+                        currentProd >= config.targetValue,
+                        config.passImg,
+                        config.failImg
+                    );
 
                     return;
                 } catch (error) {
@@ -348,24 +371,17 @@
 
             const jsonData = await loadHtmlEmbeddedJson(config.fileName);
             document.getElementById(config.targetEl).textContent = jsonData?.target ?? "-";
-            document.getElementById(config.focusEl).textContent = jsonData?.focus ?? "-";
+            document.getElementById(config.valueEl).textContent = jsonData?.focus ?? "-";
 
-            const img = document.getElementById("plough-img");
-            const statusEl = document.getElementById("plough-kpi-status");
             const prodValue = parseFloat(jsonData?.focus || 0);
-            const targetValue = 0.063;
-            const isPass = prodValue >= targetValue;
 
-            if (img) {
-                img.src = isPass ? "pass_plough.png" : "fail_plough.png";
-            }
-
-            if (statusEl) {
-                statusEl.textContent = isPass ? "ผ่าน" : "ไม่ผ่าน";
-                statusEl.className = isPass
-                    ? "mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300"
-                    : "mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300";
-            }
+            setStatusUI(
+                document.getElementById(config.statusEl),
+                document.getElementById(config.imgEl),
+                prodValue >= config.targetValue,
+                config.passImg,
+                config.failImg
+            );
         }
 
         async function loadScrewData() {
@@ -410,11 +426,20 @@
                     const latestRow = actualRows.length ? actualRows[actualRows.length - 1] : null;
 
                     const currentActual = todayRow
-                        ? todayRow.actual.toFixed(2)
-                        : (latestRow ? latestRow.actual.toFixed(2) : "-");
+                        ? todayRow.actual
+                        : (latestRow ? latestRow.actual : 0);
 
-                    document.getElementById(config.dailyEl).textContent = "9.84";
-                    document.getElementById(config.unitEl).textContent = currentActual;
+                    document.getElementById(config.targetEl).textContent = "9.84";
+                    document.getElementById(config.valueEl).textContent = currentActual ? currentActual.toFixed(2) : "-";
+
+                    setStatusUI(
+                        document.getElementById(config.statusEl),
+                        document.getElementById(config.imgEl),
+                        currentActual >= config.targetValue,
+                        config.passImg,
+                        config.failImg
+                    );
+
                     return;
                 } catch (error) {
                     console.error("Screw API error:", error);
@@ -422,8 +447,18 @@
             }
 
             const jsonData = await loadHtmlEmbeddedJson(config.fileName);
-            document.getElementById(config.dailyEl).textContent = jsonData?.daily ?? "9.84";
-            document.getElementById(config.unitEl).textContent = jsonData?.unit ?? "-";
+            document.getElementById(config.targetEl).textContent = jsonData?.daily ?? "9.84";
+            document.getElementById(config.valueEl).textContent = jsonData?.unit ?? "-";
+
+            const unitValue = parseFloat(jsonData?.unit || 0);
+
+            setStatusUI(
+                document.getElementById(config.statusEl),
+                document.getElementById(config.imgEl),
+                unitValue >= config.targetValue,
+                config.passImg,
+                config.failImg
+            );
         }
 
         async function updateDashboardCards() {
