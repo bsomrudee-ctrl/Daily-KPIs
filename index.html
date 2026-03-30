@@ -330,11 +330,11 @@
                     const isPass = prodValue >= targetValue;
 
                     if (img) {
-                        img.src = isPass ? "pass_plough.png" : "fail_plough.png";
+                        img.src = isPass ? "pass_plough.png" : "fail_plough01.png";
                     }
 
                     if (statusEl) {
-                        statusEl.textContent = isPass ? "ผ่าน" : "ไม่ผ่าน";
+                        statusEl.textContent = isPass ? "ผ่าน" : "KPI ไม่ผ่านสักที จะโมโหแล้วนะ";
                         statusEl.className = isPass
                             ? "mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300"
                             : "mb-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300";
